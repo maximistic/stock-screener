@@ -22,7 +22,7 @@ requests to backedn: axios
  - cd backend
  - npm init -y
  - npm install express cors yahoo-finance2
-
+ - npm install axios
 
 ## File Structure
 
@@ -91,3 +91,14 @@ routes/stocks.js
 Defines API endpoints related to stock operations (e.g., search, get details).
 services/stockService.js
 Contains business logic for interacting with the stock API (yahoo-finance2).
+
+
+### working
+
+ #### Frontend 
+  - npm run dev
+  - http://localhost:5173/
+
+ #### Backend
+  - node server.js
+  - http://localhost:5000/api/stocks

@@ -1,26 +1,33 @@
+// src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, ChevronDown } from 'lucide-react';
 
-// Dummy stocks data
-const dummyStocks = [
-  { name: 'Reliance Industries', symbol: 'RELIANCE', price: 2500.50, change: 1.5, volume: 1000000 },
-  { name: 'Tata Consultancy Services', symbol: 'TCS', price: 3450.75, change: -0.5, volume: 750000 },
-  { name: 'HDFC Bank', symbol: 'HDFCBANK', price: 1600.80, change: 2.0, volume: 900000 },
-  { name: 'Infosys', symbol: 'INFY', price: 1800.25, change: 0.5, volume: 800000 },
-  { name: 'ICICI Bank', symbol: 'ICICIBANK', price: 700.40, change: -1.0, volume: 950000 },
-];
-
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [stocks, setStocks] = useState(dummyStocks);
-  const [filteredStocks, setFilteredStocks] = useState(dummyStocks);
+  const [stocks, setStocks] = useState([]);
+  const [filteredStocks, setFilteredStocks] = useState([]);
   const [isSortOpen, setIsSortOpen] = useState(false);
+
+  useEffect(() => {
+    // Fetch stocks from the backend API
+    const fetchStocks = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/stocks'); // Adjust the URL if needed
+        const data = await response.json();
+        setStocks(data);
+        setFilteredStocks(data); // Initialize filtered stocks
+      } catch (error) {
+        console.error("Error fetching stocks:", error);
+      }
+    };
+    fetchStocks();
+  }, []);
 
   useEffect(() => {
     // Filter stocks based on search term
     setFilteredStocks(
       stocks.filter(stock =>
-        stock.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        stock.shortName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         stock.symbol.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
@@ -30,13 +37,13 @@ const Home = () => {
     const sortedStocks = [...filteredStocks].sort((a, b) => {
       switch (criteria) {
         case 'name':
-          return a.name.localeCompare(b.name);
+          return a.shortName.localeCompare(b.shortName);
         case 'price':
-          return a.price - b.price;
+          return a.regularMarketPrice - b.regularMarketPrice;
         case 'change':
-          return b.change - a.change;
+          return b.regularMarketChangePercent - a.regularMarketChangePercent;
         case 'volume':
-          return b.volume - a.volume;
+          return b.regularMarketVolume - a.regularMarketVolume;
         default:
           return 0;
       }
@@ -109,14 +116,14 @@ const Home = () => {
                 {filteredStocks.map(stock => (
                   <tr key={stock.symbol} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-3">
-                      <div className="font-semibold">{stock.name}</div>
+                      <div className="font-semibold">{stock.shortName}</div>
                       <div className="text-sm text-gray-600">{stock.symbol}</div>
                     </td>
-                    <td className="px-4 py-3 text-right">{stock.price.toFixed(2)}</td>
-                    <td className={`px-4 py-3 text-right ${stock.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)}%
+                    <td className="px-4 py-3 text-right">{stock.regularMarketPrice.toFixed(2)}</td>
+                    <td className={`px-4 py-3 text-right ${stock.regularMarketChangePercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {stock.regularMarketChangePercent >= 0 ? '+' : ''}{stock.regularMarketChangePercent.toFixed(2)}%
                     </td>
-                    <td className="px-4 py-3 text-right">{stock.volume.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right">{stock.regularMarketVolume.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
