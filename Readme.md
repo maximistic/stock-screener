@@ -13,6 +13,9 @@ requests to backedn: axios
  - npm install
  - npm run dev
  - npm install react-router-dom axios recharts
+ - npm install lucide-react
+ - npm install -D tailwindcss postcss autoprefixer
+ - npx tailwindcss init -p
 
 ### Backend
  - mkdir backend
