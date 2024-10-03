@@ -1,12 +1,15 @@
-// src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, CheckCircle, Plus } from 'lucide-react'; // Adjust imports
+import { useNavigate } from 'react-router-dom'; // For navigation to reqpage
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [stocks, setStocks] = useState([]);
   const [filteredStocks, setFilteredStocks] = useState([]);
-  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [watchlist, setWatchlist] = useState({});
+  const [notification, setNotification] = useState(null); // Notification state
+  const navigate = useNavigate(); // Hook for navigation
 
   useEffect(() => {
     // Fetch stocks from the backend API
@@ -33,35 +36,67 @@ const Home = () => {
     );
   }, [searchTerm, stocks]);
 
-  const handleSort = (criteria) => {
-    const sortedStocks = [...filteredStocks].sort((a, b) => {
-      switch (criteria) {
-        case 'name':
-          return a.shortName.localeCompare(b.shortName);
-        case 'price':
-          return a.regularMarketPrice - b.regularMarketPrice;
-        case 'change':
-          return b.regularMarketChangePercent - a.regularMarketChangePercent;
-        case 'volume':
-          return b.regularMarketVolume - a.regularMarketVolume;
-        default:
-          return 0;
-      }
-    });
-    setFilteredStocks(sortedStocks);
-    setIsSortOpen(false);
+  const handleFilter = (criteria) => {
+    let filtered = [];
+    switch (criteria) {
+      case 'topGainer':
+        filtered = [...stocks].sort((a, b) => b.regularMarketChangePercent - a.regularMarketChangePercent);
+        break;
+      case 'topLoser':
+        filtered = [...stocks].sort((a, b) => a.regularMarketChangePercent - b.regularMarketChangePercent);
+        break;
+      case 'topVolume':
+        filtered = [...stocks].sort((a, b) => b.regularMarketVolume - a.regularMarketVolume);
+        break;
+      case 'lowestVolume':
+        filtered = [...stocks].sort((a, b) => a.regularMarketVolume - b.regularMarketVolume);
+        break;
+      case 'allStocks':
+        filtered = stocks; // Reset to all stocks
+        break;
+      default:
+        filtered = stocks; // Fallback
+    }
+    setFilteredStocks(filtered);
+    setIsFilterOpen(false);
   };
 
-  const handleFilter = () => {
-    // Placeholder for filter functionality
-    alert("Filter functionality to be implemented");
+  const toggleWatchlist = (symbol) => {
+    const updatedWatchlist = { ...watchlist, [symbol]: !watchlist[symbol] }; // Toggle watchlist status
+    setWatchlist(updatedWatchlist);
+
+    // Set notification for adding/removing stocks
+    setNotification({
+      message: updatedWatchlist[symbol] ? `${symbol} added to the watchlist` : `${symbol} removed from the watchlist`,
+      type: updatedWatchlist[symbol] ? 'success' : 'error',
+    });
+
+    // Hide notification after 2 seconds
+    setTimeout(() => {
+      setNotification(null);
+    }, 2000);
+  };
+
+  const handleExplore = () => {
+    navigate('/reqpage'); // Redirect to /reqpage
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
+    <div className="min-h-screen bg-gray-100 text-gray-900 relative">
+      {/* Notification Popup */}
+      {notification && (
+        <div
+          className={`fixed top-4 right-4 py-2 px-4 rounded shadow-lg text-white ${
+            notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-center mb-8">Indian Stock Screener</h1>
-        
+
         <div className="max-w-3xl mx-auto mb-12">
           <div className="relative mb-4">
             <input
@@ -74,29 +109,22 @@ const Home = () => {
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-500" size={24} />
           </div>
 
-          <div className="flex justify-between mb-4">
-            <button 
+          <div className="relative mb-4">
+            <button
               className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
-              onClick={handleFilter}
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
             >
-              <Filter className="mr-2" size={20} /> Filter
+              Filter by <ChevronDown className="ml-2" size={20} />
             </button>
-            <div className="relative">
-              <button 
-                className="flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
-                onClick={() => setIsSortOpen(!isSortOpen)}
-              >
-                Sort by <ChevronDown className="ml-2" size={20} />
-              </button>
-              {isSortOpen && (
-                <div className="absolute right-0 mt-2 bg-white border rounded shadow-lg z-10">
-                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleSort('name')}>Name</button>
-                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleSort('price')}>Price</button>
-                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleSort('change')}>% Change</button>
-                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleSort('volume')}>Volume</button>
-                </div>
-              )}
-            </div>
+            {isFilterOpen && (
+              <div className="absolute mt-2 bg-white border rounded shadow-lg z-10 w-full">
+                <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleFilter('topGainer')}>Top Gainer</button>
+                <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleFilter('topLoser')}>Top Loser</button>
+                <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleFilter('topVolume')}>Top Volume</button>
+                <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleFilter('lowestVolume')}>Lowest Volume</button>
+                <button className="block w-full text-left px-4 py-2 hover:bg-gray-200" onClick={() => handleFilter('allStocks')}>All Stocks</button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -110,6 +138,7 @@ const Home = () => {
                   <th className="px-4 py-2 text-right">Price (₹)</th>
                   <th className="px-4 py-2 text-right">Change (%)</th>
                   <th className="px-4 py-2 text-right">Volume</th>
+                  <th className="px-4 py-2 text-right">Watchlist</th>
                 </tr>
               </thead>
               <tbody>
@@ -124,11 +153,35 @@ const Home = () => {
                       {stock.regularMarketChangePercent >= 0 ? '+' : ''}{stock.regularMarketChangePercent.toFixed(2)}%
                     </td>
                     <td className="px-4 py-3 text-right">{stock.regularMarketVolume.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => toggleWatchlist(stock.symbol)}
+                        className="relative"
+                        title={watchlist[stock.symbol] ? '' : 'Add to watchlist'} // Tooltip
+                      >
+                        {watchlist[stock.symbol] ? (
+                          <CheckCircle className="text-green-600" size={20} />
+                        ) : (
+                          <div className="w-6 h-6 border border-gray-400 rounded-full flex items-center justify-center">
+                            <Plus className="text-gray-400" size={16} />
+                          </div>
+                        )}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        </div>
+
+        <div className="flex justify-center mt-8">
+          <button
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+            onClick={handleExplore} // Navigate to reqpage
+          >
+            Explore all stocks
+          </button>
         </div>
       </main>
     </div>

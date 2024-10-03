@@ -3,7 +3,6 @@ const yahooFinance = require('yahoo-finance2').default;
 
 const getStockData = async (symbols) => {
   try {
-    // Fetch data for the provided stock symbols
     const result = await yahooFinance.quote(symbols);
     return result;
   } catch (error) {
@@ -12,6 +11,20 @@ const getStockData = async (symbols) => {
   }
 };
 
+const sortStocksByChange = (stocks, direction = 'desc') => {
+  return stocks.sort((a, b) => direction === 'asc'
+    ? a.regularMarketChangePercent - b.regularMarketChangePercent
+    : b.regularMarketChangePercent - a.regularMarketChangePercent);
+};
+
+const sortStocksByVolume = (stocks, direction = 'desc') => {
+  return stocks.sort((a, b) => direction === 'asc'
+    ? a.regularMarketVolume - b.regularMarketVolume
+    : b.regularMarketVolume - a.regularMarketVolume);
+};
+
 module.exports = {
   getStockData,
+  sortStocksByChange,
+  sortStocksByVolume
 };
