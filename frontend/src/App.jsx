@@ -4,7 +4,7 @@ import Home from './pages/Home';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import Watchlist from './pages/Watchlist';
-import StockPage from './pages/StockPage';
+import Cards from "../src/components/Cards";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
 
             <Route path="/" element={<Home />} />
             <Route path="/watchlist" element={<Watchlist />} />
-            <Route path='/reqpage' element={<StockPage />}/>
+            <Route path='/cards' element={<Cards />}/>
           
           </Routes>
         </div>

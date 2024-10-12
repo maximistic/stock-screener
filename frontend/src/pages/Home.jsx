@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { Search, ChevronDown, CheckCircle, Plus } from 'lucide-react'; // Adjust imports
 import { useNavigate } from 'react-router-dom'; // For navigation to reqpage
 
@@ -78,7 +78,7 @@ const Home = () => {
   };
 
   const handleExplore = () => {
-    navigate('/reqpage'); // Redirect to /reqpage
+    navigate('/cards'); // Redirect to /reqpage
   };
 
   return (
@@ -178,7 +178,7 @@ const Home = () => {
         <div className="flex justify-center mt-8">
           <button
             className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
-            onClick={handleExplore} // Navigate to reqpage
+            onClick={handleExplore} 
           >
             Explore all stocks
           </button>
