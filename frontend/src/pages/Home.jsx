@@ -1,6 +1,6 @@
-import  { useState, useEffect } from 'react';
-import { Search, ChevronDown, CheckCircle, Plus } from 'lucide-react'; // Adjust imports
-import { useNavigate } from 'react-router-dom'; // For navigation to reqpage
+import { useState, useEffect } from 'react';
+import { Search, ChevronDown, CheckCircle, Plus } from 'lucide-react'; 
+import { useNavigate } from 'react-router-dom'; 
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -8,17 +8,16 @@ const Home = () => {
   const [filteredStocks, setFilteredStocks] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [watchlist, setWatchlist] = useState({});
-  const [notification, setNotification] = useState(null); // Notification state
-  const navigate = useNavigate(); // Hook for navigation
+  const [notification, setNotification] = useState(null); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
-    // Fetch stocks from the backend API
     const fetchStocks = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/stocks'); // Adjust the URL if needed
+        const response = await fetch('http://localhost:5000/api/stocks'); 
         const data = await response.json();
         setStocks(data);
-        setFilteredStocks(data); // Initialize filtered stocks
+        setFilteredStocks(data); 
       } catch (error) {
         console.error("Error fetching stocks:", error);
       }
@@ -27,7 +26,6 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    // Filter stocks based on search term
     setFilteredStocks(
       stocks.filter(stock =>
         stock.shortName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,38 +50,35 @@ const Home = () => {
         filtered = [...stocks].sort((a, b) => a.regularMarketVolume - b.regularMarketVolume);
         break;
       case 'allStocks':
-        filtered = stocks; // Reset to all stocks
+        filtered = stocks; 
         break;
       default:
-        filtered = stocks; // Fallback
+        filtered = stocks; 
     }
     setFilteredStocks(filtered);
     setIsFilterOpen(false);
   };
 
   const toggleWatchlist = (symbol) => {
-    const updatedWatchlist = { ...watchlist, [symbol]: !watchlist[symbol] }; // Toggle watchlist status
+    const updatedWatchlist = { ...watchlist, [symbol]: !watchlist[symbol] }; 
     setWatchlist(updatedWatchlist);
 
-    // Set notification for adding/removing stocks
     setNotification({
       message: updatedWatchlist[symbol] ? `${symbol} added to the watchlist` : `${symbol} removed from the watchlist`,
       type: updatedWatchlist[symbol] ? 'success' : 'error',
     });
 
-    // Hide notification after 2 seconds
     setTimeout(() => {
       setNotification(null);
     }, 2000);
   };
 
   const handleExplore = () => {
-    navigate('/cards'); // Redirect to /reqpage
+    navigate('/cards'); 
   };
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 relative">
-      {/* Notification Popup */}
       {notification && (
         <div
           className={`fixed top-4 right-4 py-2 px-4 rounded shadow-lg text-white ${
@@ -157,7 +152,7 @@ const Home = () => {
                       <button
                         onClick={() => toggleWatchlist(stock.symbol)}
                         className="relative"
-                        title={watchlist[stock.symbol] ? '' : 'Add to watchlist'} // Tooltip
+                        title={watchlist[stock.symbol] ? '' : 'Add to watchlist'} 
                       >
                         {watchlist[stock.symbol] ? (
                           <CheckCircle className="text-green-600" size={20} />
