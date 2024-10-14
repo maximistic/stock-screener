@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const Filters = () => {
@@ -7,6 +7,8 @@ const Filters = () => {
   const { filter } = location.state || {}; // Get the passed filter
 
   const [selectedSubFilter, setSelectedSubFilter] = useState(''); // State for selected sub-filter
+  const [stocks, setStocks] = useState([]); // State to store fetched stocks
+  const [loading, setLoading] = useState(true); // Loading state
 
   const sectors = ['FMCG', 'Agriculture', 'Automobile', 'Banking', 'Energy', 'IT', 'Healthcare', 'Pharma', 'Defense', 'Telecom', 'Real Estate', 'Textiles', 'Utilities'];
   const marketCaps = ['Large Cap', 'Mid Cap', 'Small Cap', 'Micro Cap'];
@@ -16,6 +18,24 @@ const Filters = () => {
   const investmentStyles = ['Growth', 'Value', 'Income'];
   const esgRatings = ['High ESG', 'Medium ESG', 'Low ESG'];
   const liquidity = ['High Liquidity', 'Medium Liquidity', 'Low Liquidity'];
+
+  // Function to fetch stocks from the API
+  const fetchStocks = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/stocks');
+      const data = await response.json();
+      setStocks(data); // Set fetched stocks
+      setLoading(false); // Set loading state to false
+    } catch (error) {
+      console.error('Error fetching stocks:', error);
+      setLoading(false);
+    }
+  };
+
+  // Call fetchStocks when component mounts
+  useEffect(() => {
+    fetchStocks();
+  }, []);
 
   const renderButtons = (options) => (
     <div className="flex overflow-x-auto space-x-4 pb-4">
@@ -32,6 +52,36 @@ const Filters = () => {
         </motion.button>
       ))}
     </div>
+  );
+
+  // Render stock table (similar to the provided image)
+  const renderStockTable = () => (
+    <table className="min-w-full bg-white border">
+      <thead>
+        <tr>
+          <th className="py-2 px-4 border-b-2">Name (Symbol)</th>
+          <th className="py-2 px-4 border-b-2">Price (₹)</th>
+          <th className="py-2 px-4 border-b-2">Change (%)</th>
+          <th className="py-2 px-4 border-b-2">Volume</th>
+          <th className="py-2 px-4 border-b-2">Watchlist</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stocks.map((stock) => (
+          <tr key={stock.symbol} className="text-center">
+            <td className="py-2 px-4 border-b">{stock.name} ({stock.symbol})</td>
+            <td className="py-2 px-4 border-b">{stock.price}</td>
+            <td className={`py-2 px-4 border-b ${stock.change > 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {stock.change}%
+            </td>
+            <td className="py-2 px-4 border-b">{stock.volume.toLocaleString()}</td>
+            <td className="py-2 px-4 border-b">
+              <button className="text-blue-500 hover:text-blue-700">+</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 
   const renderContent = () => {
@@ -141,6 +191,14 @@ const Filters = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Filters</h1>
       {renderContent()}
+
+      <h2 className="text-lg font-bold mt-6 mb-4">Stocks</h2>
+
+      {loading ? (
+        <p>Loading stocks...</p>
+      ) : (
+        renderStockTable()
+      )}
     </div>
   );
 };
